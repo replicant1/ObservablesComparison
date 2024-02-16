@@ -5,7 +5,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.example.observables.databinding.ActivityMainBinding
+import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +32,20 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnSharedFlow.setOnClickListener {
             viewModel.triggerSharedFlow()
+        }
+
+        subscribeToObservables()
+    }
+
+    private fun subscribeToObservables() {
+        viewModel.liveData.observe(this) {
+            binding.tvLiveData.text = it
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.stateFlow.collectLatest {
+                binding.tvStateFlow.text = it
+            }
         }
     }
 }
