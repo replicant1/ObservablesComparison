@@ -7,12 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.example.observables.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel : MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +30,11 @@ class MainActivity : AppCompatActivity() {
             viewModel.triggerStateFlow()
         }
         binding.btnFlow.setOnClickListener {
-            viewModel.triggerFlow()
+            lifecycleScope.launch {
+                viewModel.triggerFlow().collectLatest {
+                    binding.tvFlow.text = it
+                }
+            }
         }
         binding.btnSharedFlow.setOnClickListener {
             viewModel.triggerSharedFlow()
@@ -43,8 +49,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.stateFlow.collectLatest {
-                binding.tvStateFlow.text = it
+            viewModel.sharedFlow.collectLatest {
+//                binding.tvStateFlow.text = it
+                Snackbar.make(
+                    binding.root,
+                    it,
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
         }
     }
